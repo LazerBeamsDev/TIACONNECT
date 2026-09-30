@@ -29,6 +29,40 @@ public class ProjectReadTools
             "Extended metadata (history, comments, languages) was too large to return in full.");
     }
 
+    [McpServerTool(Name = "export_to_folder", ReadOnly = true, Destructive = false, OpenWorld = false)]
+    [Description("Export PLC blocks, PLC data types and tag tables of one PLC into files under the server's configured export root, "
+        + "for objects too large to read through tool responses. The project is not modified. "
+        + "Blocks: documents (.s7dcl/.s7res, readable LAD/FBD/SCL/DB) and source (.scl/.db where eligible), SimaticML .xml on request "
+        + "and automatically when documents are unavailable (GRAPH, STL); types: .udt (xml fallback); tag tables: SimaticML .xml. "
+        + "Work is chunked by time: repeat the call with the returned runId and nextOffset until complete is true. "
+        + "The response lists the export folder and manifest.jsonl (one JSON line per exported item with relative file names); read the files from disk.")]
+    public static async Task<string> ExportToFolder(
+        OpennessWorkerClient workerClient,
+        TiaMcpServer.Export.ExportRootOptions exportRootOptions,
+        [Description("Optional PLC software or device name. Required only when the project has more than one PLC.")] string? plcName = null,
+        [Description("Optional object kinds to export: blocks, types, tagTables. Defaults to all three.")] string[]? include = null,
+        [Description("Optional block formats: documents, source, xml. Defaults to documents and source.")] string[]? formats = null,
+        [Description("Optional item path prefixes such as PLC_1/Blocks/Folder, PLC_1/Types or PLC_1/Tags/Table. Only matching items are exported.")] string[]? pathPrefixes = null,
+        [Description("Run id returned by the previous call; required together with offset to continue an export.")] string? runId = null,
+        [Description("Index of the first item for this call; use nextOffset from the previous response. Defaults to 0.")] int? offset = null,
+        [Description("Optional time budget of one call in seconds (1-240). Defaults to 35 so the call returns before client timeouts.")] int? timeBudgetSeconds = null,
+        [Description("Optional path to a .ap21 project file. If omitted, uses the project currently open in TIA Portal.")] string? projectPath = null)
+    {
+        var result = await workerClient.ExportToFolderAsync(
+            exportRootOptions.ExportRoot,
+            projectPath,
+            plcName,
+            include,
+            formats,
+            pathPrefixes,
+            runId,
+            offset,
+            timeBudgetSeconds).ConfigureAwait(false);
+        return StandaloneToolResultFormatter.Format(
+            result,
+            "Narrow the export with pathPrefixes or include.");
+    }
+
     [McpServerTool(
         Name = "browse_project_tree",
         ReadOnly = true,

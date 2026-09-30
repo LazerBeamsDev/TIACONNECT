@@ -780,6 +780,38 @@ public class OpennessWorkerClient : IDisposable
             "{}");
     }
 
+    /// <summary>
+    /// ANet fork: chunked export of PLC blocks, PLC data types and tag tables into a folder under
+    /// the configured export root. The response carries only the manifest summary, never content.
+    /// </summary>
+    public Task<WorkerCallResult> ExportToFolderAsync(
+        string? exportRoot,
+        string? projectPath,
+        string? plcName,
+        IReadOnlyList<string>? include,
+        IReadOnlyList<string>? formats,
+        IReadOnlyList<string>? pathPrefixes,
+        string? runId,
+        int? offset,
+        int? timeBudgetSeconds)
+    {
+        return SendBoundProjectRequestAsync(
+            "export_to_folder",
+            projectPath,
+            request =>
+            {
+                request.ExportRoot = exportRoot;
+                request.PlcName = plcName;
+                request.ExportInclude = include?.ToList();
+                request.ExportFormats = formats?.ToList();
+                request.ExportPathPrefixes = pathPrefixes?.ToList();
+                request.ExportRunId = runId;
+                request.ExportOffset = offset;
+                request.ExportTimeBudgetSeconds = timeBudgetSeconds;
+            },
+            "{}");
+    }
+
     public Task<WorkerCallResult> GetBlockContentAsync(
         string blockPath,
         string? projectPath,

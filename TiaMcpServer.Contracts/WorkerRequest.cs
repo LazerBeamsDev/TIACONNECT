@@ -387,4 +387,29 @@ public class WorkerRequest
     public bool SaveBeforeClose { get; set; } = true;
 
     #endregion
+
+    #region ANet fork — export_to_folder
+
+    /// <summary>Forwarded by: export_to_folder. Absolute export root configured on the host.</summary>
+    public string? ExportRoot { get; set; }
+
+    /// <summary>Forwarded by: export_to_folder. Subset of blocks, types, tagTables.</summary>
+    public List<string>? ExportInclude { get; set; }
+
+    /// <summary>Forwarded by: export_to_folder. Subset of xml, documents, source.</summary>
+    public List<string>? ExportFormats { get; set; }
+
+    /// <summary>Forwarded by: export_to_folder. Item path prefixes (for example PLC_1/Blocks/Folder).</summary>
+    public List<string>? ExportPathPrefixes { get; set; }
+
+    /// <summary>Forwarded by: export_to_folder. Run folder id returned by the first call.</summary>
+    public string? ExportRunId { get; set; }
+
+    /// <summary>Forwarded by: export_to_folder. Index of the first item to export in this call.</summary>
+    public int? ExportOffset { get; set; }
+
+    /// <summary>Forwarded by: export_to_folder. Time budget of one call in seconds.</summary>
+    public int? ExportTimeBudgetSeconds { get; set; }
+
+    #endregion
 }

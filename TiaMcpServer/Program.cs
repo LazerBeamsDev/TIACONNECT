@@ -65,6 +65,7 @@ namespace TiaMcpServer
             builder.Services.AddSingleton(sp => new WriteSafetyService(
                 sp.GetRequiredService<ProjectSessionBinding>()));
             builder.Services.AddSingleton(accessPolicy);
+            builder.Services.AddSingleton(TiaMcpServer.Export.ExportRootOptions.Resolve(args));
             builder.Services.AddSingleton(sp => new OpennessWorkerClient(
                 sp.GetRequiredService<ProjectSessionBinding>(),
                 sp.GetRequiredService<ILogger<OpennessWorkerClient>>(),

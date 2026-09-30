@@ -155,6 +155,7 @@ internal static class Program
                 "get_block_content"   => GetBlockContent(request),
                 "update_block_logic"  => UpdateBlockLogic(request),
                 "get_type_content"    => GetTypeContent(request),
+                "export_to_folder"    => ExportToFolder(request),
                 "update_type_content" => UpdateTypeContent(request),
                 "list_tag_tables"     => ListTagTables(request),
                 "read_update_tag_safety_snapshot" => ReadUpdateTagSafetySnapshot(request),
@@ -866,6 +867,10 @@ internal static class Program
             return BlockUpdateOutcomeDecorator.Decorate(exception, normalizedFormat, importerEntered);
         }
     }
+
+    /// <summary>ANet fork: chunked export of blocks, types and tag tables under the export root.</summary>
+    private static WorkerResponse ExportToFolder(WorkerRequest request)
+        => WithProject(request, project => Success(ProjectFolderExporter.Export(project, request)));
 
     private static WorkerResponse GetTypeContent(WorkerRequest request)
     {
