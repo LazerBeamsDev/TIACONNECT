@@ -61,6 +61,7 @@ internal static class HmiUnifiedExporter
         "Comment", "Priority", "Class", "AlarmClass", "RaisedStateTag", "TriggerTag", "TriggerBit",
         "LimitTag", "AlarmText", "Origin", "Area", "Station", "Partner", "CommunicationDriver",
         "InitialValue", "Color", "Size", "FontName", "FontWeight", "Italic", "Underline",
+        "ContainedType", "FaceplateType", "Type", "TypeName", "LibraryObject", "Version", "Graphics",
     };
 
     public static HmiUnifiedExportResult Export(Project project, WorkerRequest request)
@@ -381,7 +382,9 @@ internal static class HmiUnifiedExporter
     {
         var typeName = nested.GetType().Name;
         if (typeName.IndexOf("Script", StringComparison.OrdinalIgnoreCase) >= 0 ||
-            typeName.IndexOf("Multilingual", StringComparison.OrdinalIgnoreCase) >= 0)
+            typeName.IndexOf("Multilingual", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            typeName.EndsWith("Part", StringComparison.Ordinal) ||
+            typeName.IndexOf("Converter", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             return false;
         }
