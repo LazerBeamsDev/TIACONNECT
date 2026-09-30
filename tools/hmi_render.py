@@ -118,6 +118,20 @@ def tooltip(item):
     return "\n".join(lines)
 
 
+def font_size(item, fallback):
+    font = item.get("font")
+    if isinstance(font, dict) and isinstance(font.get("size"), (int, float)) and font["size"] > 0:
+        return int(font["size"])
+    return fallback
+
+
+def faceplate_label(item):
+    contained = item.get("containedType")
+    if isinstance(contained, str) and contained:
+        return contained.replace("\\", "/").split("/")[-1]
+    return text_of(item.get("caption")) or item.get("name", "")
+
+
 def bound_tag(item, prop="ProcessValue"):
     for dyn in item.get("dynamizations") or []:
         if dyn.get("propertyName") == prop and dyn.get("tag"):
@@ -138,7 +152,7 @@ def svg_item(item, screens, depth, embed):
     border = color(item.get("borderColor"), (100, 100, 106, 255))
     border_w = num(item, "borderWidth", 1)
     fore = color(item.get("foreColor"), (0, 0, 0, 255))
-    font_px = max(9, min(18, int(h * 0.45))) if h else 12
+    font_px = font_size(item, max(9, min(18, int(h * 0.45))) if h else 12)
     title = f"<title>{html.escape(tooltip(item))}</title>"
     parts = []
 
@@ -196,7 +210,7 @@ def svg_item(item, screens, depth, embed):
         elif t == "HmiGraphicView":
             parts.append(label(f"[graphic: {item.get('graphic', '?')}]", color_=(120, 120, 120, 255), italic=True, size=12))
         elif t == "HmiFaceplateContainer":
-            parts.append(label(f"[faceplate: {text_of(item.get('caption')) or item.get('name', '')}]",
+            parts.append(label(f"[faceplate: {faceplate_label(item)}]",
                                color_=(120, 80, 20, 255), italic=True, size=12))
         elif t in ("HmiBar", "HmiSlider"):
             tag = bound_tag(item)
@@ -277,7 +291,7 @@ def png_screen(screen, screens, path, embed):
             back = color(item.get("backColor"))
             border = color(item.get("borderColor"), (100, 100, 106, 255))
             fore = color(item.get("foreColor"), (0, 0, 0, 255))
-            size = max(9, min(18, int(ih * 0.45))) if ih else 12
+            size = max(8, int(font_size(item, max(9, min(18, int(ih * 0.45))) if ih else 12) * scale))
             if t == "HmiLine":
                 draw.line([(ox + num(item, "x1") * scale, oy + num(item, "y1") * scale),
                            (ox + num(item, "x2") * scale, oy + num(item, "y2") * scale)],
@@ -315,7 +329,8 @@ def png_screen(screen, screens, path, embed):
             elif t == "HmiGraphicView":
                 draw_text((x, y, iw, ih), f"[graphic: {item.get('graphic', '?')}]", (120, 120, 120, 255), 12)
             elif t == "HmiFaceplateContainer":
-                draw_text((x, y, iw, ih), f"[faceplate: {text_of(item.get('caption')) or item.get('name', '')}]", (120, 80, 20, 255), 12)
+                draw_text((x, y, iw, ih), f"[{faceplate_label(item)}]", (120, 80, 20, 255), 11)
+                draw_text((x, y + ih - 16, iw, 14), item.get("name", ""), (90, 90, 90, 255), 10)
             elif t in ("HmiBar", "HmiSlider", "HmiAlarmControl", "HmiAlarmLineControl", "HmiWebControl"):
                 draw_text((x, y, iw, ih), f"[{t[3:]}: {bound_tag(item) or item.get('name', '')}]", (60, 60, 60, 255), 12)
             if bindings(item) and t != "HmiIOField":
