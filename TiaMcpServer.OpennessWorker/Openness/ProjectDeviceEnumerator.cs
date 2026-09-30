@@ -32,7 +32,41 @@ internal static class ProjectDeviceEnumerator
             groupIndex++;
         }
 
+        // Decentral stations (ET 200SP, GSD devices, switches) usually live in the system
+        // "Ungrouped devices" group, which is neither project.Devices nor a user group.
+        var ungroupedIndex = 0;
+        foreach (Device device in EnumerateUngroupedDevices(project))
+        {
+            devices.Add(new LocatedProjectDevice(device, $"ungroupedDevices/{ungroupedIndex}", sourceOrder));
+            ungroupedIndex++;
+            sourceOrder++;
+        }
+
         return devices;
+    }
+
+    private static IEnumerable<Device> EnumerateUngroupedDevices(Project project)
+    {
+        DeviceSystemGroup? ungrouped;
+        try
+        {
+            ungrouped = project.UngroupedDevicesGroup;
+        }
+        catch (EngineeringException exception)
+        {
+            Console.Error.WriteLine($"Skipping ungrouped devices: {exception.Message}");
+            yield break;
+        }
+
+        if (ungrouped is null)
+        {
+            yield break;
+        }
+
+        foreach (Device device in ungrouped.Devices)
+        {
+            yield return device;
+        }
     }
 
     private static void Enumerate(
