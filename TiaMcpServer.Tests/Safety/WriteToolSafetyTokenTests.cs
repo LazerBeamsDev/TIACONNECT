@@ -46,7 +46,7 @@ public class WriteToolSafetyTokenTests
         Assert.Equal(
             new[]
             {
-                "archive_project", "browse_project_tree", "close_project", "create_project", "get_project_status",
+                "archive_project", "browse_project_tree", "close_project", "create_project", "export_to_folder", "get_project_status",
                 "open_project", "save_project", "save_project_as"
             },
             allToolNames);
