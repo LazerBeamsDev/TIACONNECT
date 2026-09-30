@@ -69,3 +69,6 @@ nunit-*.xml
 priv/
 mcp-inspector-tia.json
 .docs/
+build.request
+anet-build.log
+artifacts/
