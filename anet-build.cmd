@@ -8,6 +8,15 @@ set LOG=%~dp0anet-build.log
 set TIADIR=C:\Program Files\Siemens\Automation\Portal V21\PublicAPI\V21\net48
 echo ==== ANet build %VER% %date% %time% > "%LOG%"
 dotnet --list-sdks >> "%LOG%" 2>&1
+echo ---- PublicAPI V21 (Unified DLL check) >> "%LOG%"
+dir /b "%TIADIR%" >> "%LOG%" 2>&1
+dotnet --list-sdks | findstr /b "10.0.4 10.0.5 10.0.6 10.0.7 10.0.8 10.0.9" >nul
+if errorlevel 1 (
+  echo .NET SDK 10.0.400+ chybi - instaluji pres winget, potvrd pripadne okno UAC...
+  echo ---- winget install Microsoft.DotNet.SDK.10 >> "%LOG%"
+  winget install --id Microsoft.DotNet.SDK.10 -e --accept-source-agreements --accept-package-agreements >> "%LOG%" 2>&1
+  dotnet --list-sdks >> "%LOG%" 2>&1
+)
 echo ---- restore >> "%LOG%"
 dotnet restore TiaMcpServer.sln >> "%LOG%" 2>&1 || goto fail
 echo ---- build >> "%LOG%"
