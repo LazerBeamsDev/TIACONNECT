@@ -6,3 +6,4 @@
 # two PowerShell acceptance scripts used different on-disk endings and a
 # byte-identity check went red for a difference no committed content contained.
 *.ps1 text eol=crlf
+*.cmd text eol=crlf
