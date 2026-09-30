@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Reflection;
 using Siemens.Engineering;
 using Siemens.Engineering.HW;
 
@@ -47,25 +49,31 @@ internal static class ProjectDeviceEnumerator
 
     private static IEnumerable<Device> EnumerateUngroupedDevices(Project project)
     {
-        DeviceSystemGroup? ungrouped;
+        // Read via reflection: Project.UngroupedDevicesGroup (DeviceSystemGroup) exists in the
+        // real V21 API but not in the CI reference stubs under ref/.
+        object? ungrouped;
         try
         {
-            ungrouped = project.UngroupedDevicesGroup;
+            ungrouped = project.GetType().GetProperty("UngroupedDevicesGroup")?.GetValue(project);
         }
-        catch (EngineeringException exception)
+        catch (TargetInvocationException exception)
         {
-            Console.Error.WriteLine($"Skipping ungrouped devices: {exception.Message}");
+            Console.Error.WriteLine(
+                $"Skipping ungrouped devices: {exception.InnerException?.Message ?? exception.Message}");
             yield break;
         }
 
-        if (ungrouped is null)
+        if (ungrouped?.GetType().GetProperty("Devices")?.GetValue(ungrouped) is not IEnumerable ungroupedDevices)
         {
             yield break;
         }
 
-        foreach (Device device in ungrouped.Devices)
+        foreach (object item in ungroupedDevices)
         {
-            yield return device;
+            if (item is Device device)
+            {
+                yield return device;
+            }
         }
     }
 

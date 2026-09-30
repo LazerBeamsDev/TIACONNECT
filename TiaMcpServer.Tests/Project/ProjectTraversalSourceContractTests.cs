@@ -19,7 +19,7 @@ public class ProjectTraversalSourceContractTests
         Assert.Contains("devices/{deviceIndex}", source, StringComparison.Ordinal);
         Assert.Contains("deviceGroups/{groupIndex}", source, StringComparison.Ordinal);
         Assert.Contains("groups/{childGroupIndex}", source, StringComparison.Ordinal);
-        Assert.Contains("project.UngroupedDevicesGroup", source, StringComparison.Ordinal);
+        Assert.Contains("GetProperty(\"UngroupedDevicesGroup\")", source, StringComparison.Ordinal);
         Assert.Contains("ungroupedDevices/{ungroupedIndex}", source, StringComparison.Ordinal);
         Assert.True(
             source.IndexOf("foreach (DeviceUserGroup group in project.DeviceGroups)", StringComparison.Ordinal) <
