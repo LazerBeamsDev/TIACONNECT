@@ -812,6 +812,35 @@ public class OpennessWorkerClient : IDisposable
             "{}");
     }
 
+    /// <summary>ANet fork: chunked JSON dump of a WinCC Unified HMI into the export root.</summary>
+    public Task<WorkerCallResult> ExportHmiToFolderAsync(
+        string? exportRoot,
+        string? projectPath,
+        string? hmiName,
+        IReadOnlyList<string>? include,
+        string? attributeMode,
+        IReadOnlyList<string>? pathPrefixes,
+        string? runId,
+        int? offset,
+        int? timeBudgetSeconds)
+    {
+        return SendBoundProjectRequestAsync(
+            "export_hmi_to_folder",
+            projectPath,
+            request =>
+            {
+                request.ExportRoot = exportRoot;
+                request.ExportDeviceName = hmiName;
+                request.ExportInclude = include?.ToList();
+                request.ExportAttributeMode = attributeMode;
+                request.ExportPathPrefixes = pathPrefixes?.ToList();
+                request.ExportRunId = runId;
+                request.ExportOffset = offset;
+                request.ExportTimeBudgetSeconds = timeBudgetSeconds;
+            },
+            "{}");
+    }
+
     public Task<WorkerCallResult> GetBlockContentAsync(
         string blockPath,
         string? projectPath,

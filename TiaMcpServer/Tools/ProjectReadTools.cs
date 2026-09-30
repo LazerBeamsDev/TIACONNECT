@@ -63,6 +63,39 @@ public class ProjectReadTools
             "Narrow the export with pathPrefixes or include.");
     }
 
+    [McpServerTool(Name = "export_hmi_to_folder", ReadOnly = true, Destructive = false, OpenWorld = false)]
+    [Description("Dump a WinCC Unified HMI into JSON files under the server's configured export root: one file per screen "
+        + "(screen attributes plus every screen item with its type, geometry Left/Top/Width/Height, colors, texts, fonts, "
+        + "tag dynamizations incl. indirect addressing, and event scripts), one file per HMI tag table, alarms.json and connections.json. "
+        + "Use it to see HMI page layout and bindings; render a screen preview from the screen JSON. The project is not modified. "
+        + "Work is chunked by time: repeat with the returned runId and nextOffset until complete is true; files are listed in manifest-hmi.jsonl.")]
+    public static async Task<string> ExportHmiToFolder(
+        OpennessWorkerClient workerClient,
+        TiaMcpServer.Export.ExportRootOptions exportRootOptions,
+        [Description("Optional HMI software or device name. Required only when the project has more than one Unified HMI.")] string? hmiName = null,
+        [Description("Optional parts to export: screens, tags, alarms, connections. Defaults to all four.")] string[]? include = null,
+        [Description("Optional attribute detail for screens, items and tags: all (default, every readable attribute) or layout (geometry, colors, texts, bindings only; faster and smaller).")] string? attributes = null,
+        [Description("Optional path prefixes such as Screens/Main, Screens/<group> or Tags/<table>. Only matching items are exported.")] string[]? pathPrefixes = null,
+        [Description("Run id returned by the previous call; required together with offset to continue.")] string? runId = null,
+        [Description("Index of the first item for this call; use nextOffset from the previous response. Defaults to 0.")] int? offset = null,
+        [Description("Optional time budget of one call in seconds (1-240). Defaults to 35 so the call returns before client timeouts.")] int? timeBudgetSeconds = null,
+        [Description("Optional path to a .ap21 project file. If omitted, uses the project currently open in TIA Portal.")] string? projectPath = null)
+    {
+        var result = await workerClient.ExportHmiToFolderAsync(
+            exportRootOptions.ExportRoot,
+            projectPath,
+            hmiName,
+            include,
+            attributes,
+            pathPrefixes,
+            runId,
+            offset,
+            timeBudgetSeconds).ConfigureAwait(false);
+        return StandaloneToolResultFormatter.Format(
+            result,
+            "Narrow the export with pathPrefixes or include.");
+    }
+
     [McpServerTool(
         Name = "browse_project_tree",
         ReadOnly = true,

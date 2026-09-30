@@ -390,7 +390,7 @@ public class WorkerRequest
 
     #region ANet fork — export_to_folder
 
-    /// <summary>Forwarded by: export_to_folder. Absolute export root configured on the host.</summary>
+    /// <summary>Forwarded by: export_to_folder, export_hmi_to_folder. Absolute export root configured on the host.</summary>
     public string? ExportRoot { get; set; }
 
     /// <summary>Forwarded by: export_to_folder. Subset of blocks, types, tagTables.</summary>
@@ -408,8 +408,14 @@ public class WorkerRequest
     /// <summary>Forwarded by: export_to_folder. Index of the first item to export in this call.</summary>
     public int? ExportOffset { get; set; }
 
-    /// <summary>Forwarded by: export_to_folder. Time budget of one call in seconds.</summary>
+    /// <summary>Forwarded by: export_to_folder, export_hmi_to_folder. Time budget of one call in seconds.</summary>
     public int? ExportTimeBudgetSeconds { get; set; }
+
+    /// <summary>Forwarded by: export_hmi_to_folder. HMI software or device name.</summary>
+    public string? ExportDeviceName { get; set; }
+
+    /// <summary>Forwarded by: export_hmi_to_folder. all (every readable attribute) or layout.</summary>
+    public string? ExportAttributeMode { get; set; }
 
     #endregion
 }

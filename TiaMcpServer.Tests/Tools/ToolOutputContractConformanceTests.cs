@@ -36,6 +36,7 @@ public sealed class ToolOutputContractConformanceTests
             ["apply_write_batch"] = BatchRedesign,
             ["get_project_status"] = Phase2,
             ["export_to_folder"] = "ANet fork tool; same text envelope as get_project_status.",
+            ["export_hmi_to_folder"] = "ANet fork tool; same text envelope as get_project_status.",
             ["compile_check"] = Phase2,
             ["open_project"] = Phase3,
             ["create_project"] = Phase3,

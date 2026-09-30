@@ -598,7 +598,7 @@ public class ReadOnlyModeTests
             .ToArray();
 
         Assert.Equal(
-            new[] { "browse_project_tree", "execute_read_batch", "export_to_folder", "get_project_status", "network_read" },
+            new[] { "browse_project_tree", "execute_read_batch", "export_hmi_to_folder", "export_to_folder", "get_project_status", "network_read" },
             toolNames);
     }
 
@@ -619,7 +619,7 @@ public class ReadOnlyModeTests
             new[]
             {
                 "apply_write_batch", "archive_project", "browse_project_tree", "close_project",
-                "compile_check", "create_project", "execute_read_batch", "export_to_folder", "get_project_status",
+                "compile_check", "create_project", "execute_read_batch", "export_hmi_to_folder", "export_to_folder", "get_project_status",
                 "network_read", "network_write", "open_project", "preview_write_batch",
                 "save_project", "save_project_as"
             },

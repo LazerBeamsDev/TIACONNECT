@@ -156,6 +156,7 @@ internal static class Program
                 "update_block_logic"  => UpdateBlockLogic(request),
                 "get_type_content"    => GetTypeContent(request),
                 "export_to_folder"    => ExportToFolder(request),
+                "export_hmi_to_folder" => ExportHmiToFolder(request),
                 "update_type_content" => UpdateTypeContent(request),
                 "list_tag_tables"     => ListTagTables(request),
                 "read_update_tag_safety_snapshot" => ReadUpdateTagSafetySnapshot(request),
@@ -871,6 +872,10 @@ internal static class Program
     /// <summary>ANet fork: chunked export of blocks, types and tag tables under the export root.</summary>
     private static WorkerResponse ExportToFolder(WorkerRequest request)
         => WithProject(request, project => Success(ProjectFolderExporter.Export(project, request)));
+
+    /// <summary>ANet fork: chunked JSON dump of a WinCC Unified HMI under the export root.</summary>
+    private static WorkerResponse ExportHmiToFolder(WorkerRequest request)
+        => WithProject(request, project => Success(HmiUnifiedExporter.Export(project, request)));
 
     private static WorkerResponse GetTypeContent(WorkerRequest request)
     {
