@@ -204,9 +204,9 @@ internal static class ObjectCrossReferenceReader
         if (segments.Count >= 2 && segments[0].Equals("Types", StringComparison.OrdinalIgnoreCase))
         {
             PlcTypeGroup group = plc.TypeGroup;
-            foreach (var name in segments.Skip(1).Take(segments.Count - 2))
+            foreach (var groupName in segments.Skip(1).Take(segments.Count - 2))
             {
-                group = group.Groups.Find(name) ?? throw NotFound(objectPath);
+                group = group.Groups.Find(groupName) ?? throw NotFound(objectPath);
             }
 
             var type = group.Types.Find(segments[segments.Count - 1]) ?? throw NotFound(objectPath);
