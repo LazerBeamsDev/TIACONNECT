@@ -411,6 +411,9 @@ public class WorkerRequest
     /// <summary>Forwarded by: export_to_folder, export_hmi_to_folder. Time budget of one call in seconds.</summary>
     public int? ExportTimeBudgetSeconds { get; set; }
 
+    /// <summary>Forwarded by: read_object_cross_references. Block/type/tag-table/tag path or unique name.</summary>
+    public string? ObjectPath { get; set; }
+
     /// <summary>Forwarded by: export_hmi_to_folder. HMI software or device name.</summary>
     public string? ExportDeviceName { get; set; }
 

@@ -152,6 +152,7 @@ internal static class Program
                 "update_subnet" => UpdateSubnet(request),
                 "delete_subnet" => DeleteSubnet(request),
                 "read_cross_references" => ReadCrossReferences(request),
+                "read_object_cross_references" => ReadObjectCrossReferences(request),
                 "get_block_content"   => GetBlockContent(request),
                 "update_block_logic"  => UpdateBlockLogic(request),
                 "get_type_content"    => GetTypeContent(request),
@@ -813,6 +814,10 @@ internal static class Program
         return WithProject(request, project => Success(
             CrossReferenceReader.Read(project, request.PlcName, filter, request.MaxResults)));
     }
+
+    /// <summary>ANet fork: cross-references of one object (who reads/writes/calls it).</summary>
+    private static WorkerResponse ReadObjectCrossReferences(WorkerRequest request)
+        => WithProject(request, project => Success(ObjectCrossReferenceReader.Read(project, request)));
 
     private static WorkerResponse GetBlockContent(WorkerRequest request)
     {

@@ -812,6 +812,29 @@ public class OpennessWorkerClient : IDisposable
             "{}");
     }
 
+    /// <summary>ANet fork: cross-references of exactly one object.</summary>
+    public Task<WorkerCallResult> ReadObjectCrossReferencesAsync(
+        string objectPath,
+        string? exportRoot,
+        string? projectPath,
+        string? plcName,
+        string? filter,
+        int? maxLocations)
+    {
+        return SendBoundProjectRequestAsync(
+            "read_object_cross_references",
+            projectPath,
+            request =>
+            {
+                request.ObjectPath = objectPath;
+                request.ExportRoot = exportRoot;
+                request.PlcName = plcName;
+                request.CrossReferenceFilter = filter;
+                request.MaxResults = maxLocations;
+            },
+            "{}");
+    }
+
     /// <summary>ANet fork: chunked JSON dump of a WinCC Unified HMI into the export root.</summary>
     public Task<WorkerCallResult> ExportHmiToFolderAsync(
         string? exportRoot,

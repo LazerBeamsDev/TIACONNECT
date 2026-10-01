@@ -63,6 +63,29 @@ public class ProjectReadTools
             "Narrow the export with pathPrefixes or include.");
     }
 
+    [McpServerTool(Name = "cross_references_for", ReadOnly = true, Destructive = false, OpenWorld = false)]
+    [Description("Cross-references of exactly one object: who reads, writes or calls a block, DB (incl. each member), PLC data type, tag table or tag. "
+        + "Fast alternative to the project-wide read_cross_references. Returns a summary per referencing object (reads/writes/calls) "
+        + "and the locations (network/line, access). Oversized results are written to the export root and the response gives the file path.")]
+    public static async Task<string> CrossReferencesFor(
+        OpennessWorkerClient workerClient,
+        TiaMcpServer.Export.ExportRootOptions exportRootOptions,
+        [Description("Object path as in the export_to_folder manifest, e.g. PLC_1/Blocks/Folder/DB30, PLC_1/Types/Folder/UDT, PLC_1/Tags/Table or PLC_1/Tags/Table/Tag, or a unique block/tag/type name.")] string objectPath,
+        [Description("Optional filter: ObjectsWithReferences (default), AllObjects, ObjectsWithoutReferences, UnusedObjects.")] string? filter = null,
+        [Description("Optional cap on returned locations (default 2000).")] int? maxLocations = null,
+        [Description("Optional PLC software or device name when the path does not start with it.")] string? plcName = null,
+        [Description("Optional path to a .ap21 project file. If omitted, uses the project currently open in TIA Portal.")] string? projectPath = null)
+    {
+        var result = await workerClient.ReadObjectCrossReferencesAsync(
+            objectPath,
+            exportRootOptions.ExportRoot,
+            projectPath,
+            plcName,
+            filter,
+            maxLocations).ConfigureAwait(false);
+        return StandaloneToolResultFormatter.Format(result, "Narrow objectPath to a single member or tag.");
+    }
+
     [McpServerTool(Name = "export_hmi_to_folder", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Dump a WinCC Unified HMI into JSON files under the server's configured export root: one file per screen "
         + "(screen attributes plus every screen item with its type, geometry Left/Top/Width/Height, colors, texts, fonts, "

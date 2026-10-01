@@ -82,6 +82,7 @@ public static class OperationPolicyCatalog
             ["read_hardware_page_candidates"] = OperationCapability.Observe,
             ["search_equipment_catalog"] = OperationCapability.Observe,
             ["read_cross_references"] = OperationCapability.Observe,
+            ["read_object_cross_references"] = OperationCapability.Observe, // ANet fork (may write an oversized result under the export root)
             ["list_tag_tables"] = OperationCapability.Observe,
             ["list_network_objects"] = OperationCapability.Observe,
             ["inspect_network_object"] = OperationCapability.Observe,
