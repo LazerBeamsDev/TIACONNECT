@@ -66,7 +66,8 @@ public class ProjectReadTools
     [McpServerTool(Name = "cross_references_for", ReadOnly = true, Destructive = false, OpenWorld = false)]
     [Description("Cross-references of exactly one object: who reads, writes or calls a block, DB (incl. each member), PLC data type, tag table or tag. "
         + "Fast alternative to the project-wide read_cross_references. Returns a summary per referencing object (reads/writes/calls) "
-        + "and the locations (network/line, access). Oversized results are written to the export root and the response gives the file path.")]
+        + "and the locations (network/line, access); summary rows carry usedBy/uses counts. For an FB, TIA lists what the FB uses, and calledVia lists the users of its instance DBs. "
+        + "Oversized results are written to the export root and the response gives the file path.")]
     public static async Task<string> CrossReferencesFor(
         OpennessWorkerClient workerClient,
         TiaMcpServer.Export.ExportRootOptions exportRootOptions,

@@ -24,7 +24,7 @@ namespace TiaMcpServer.OpennessWorker.Openness;
 /// </summary>
 internal static class ObjectCrossReferenceReader
 {
-    private const int ResponseCharBudget = 45_000;
+    private const int ResponseCharBudget = 25_000;
     private const int DefaultMaxLocations = 2_000;
 
     private static readonly JsonSerializerOptions Json = new()
@@ -93,9 +93,36 @@ internal static class ObjectCrossReferenceReader
                 Writes = group.Sum(pair => pair.usage.Locations.Count(location => location.Access.IndexOf("Write", StringComparison.OrdinalIgnoreCase) >= 0)),
                 Calls = group.Sum(pair => pair.usage.Locations.Count(location => location.Access.IndexOf("Call", StringComparison.OrdinalIgnoreCase) >= 0)),
                 Locations = group.Sum(pair => pair.usage.Locations.Count),
+                UsedBy = group.Sum(pair => pair.usage.Locations.Count(location => location.ReferenceType == "UsedBy")),
+                Uses = group.Sum(pair => pair.usage.Locations.Count(location => location.ReferenceType == "Uses")),
             })
             .OrderByDescending(summary => summary.Locations)
             .ToList();
+        var hmiTags = result.Summary.Where(row => row.TypeName == "HMI_Tag").ToList();
+        if (hmiTags.Count > 3)
+        {
+            result.Summary.RemoveAll(row => row.TypeName == "HMI_Tag");
+            result.Summary.Add(new ObjectCrossReferenceSummary
+            {
+                ReferencedBy = $"{hmiTags.Count} HMI tags (e.g. {hmiTags[0].ReferencedBy})",
+                TypeName = "HMI_Tag",
+                Elements = hmiTags.Sum(row => row.Elements),
+                Locations = hmiTags.Sum(row => row.Locations),
+                UsedBy = hmiTags.Sum(row => row.UsedBy),
+                Uses = hmiTags.Sum(row => row.Uses),
+            });
+        }
+
+        if (target.Owner is FB fb)
+        {
+            result.CalledVia = ReadInstanceUsers(plcSoftware.BlockGroup, fb.Name);
+            result.Note ??= "For code blocks TIA returns what the block uses; callers are listed in calledVia (users of its instance DBs). "
+                + "Multi-instance callers (FB declared inside another FB) are not included - search the export_to_folder files for the block name.";
+        }
+        else if (target.Owner is FC)
+        {
+            result.Note ??= "For code blocks TIA returns what the block uses; callers of an FC are not included - search the export_to_folder files for the block name.";
+        }
 
         var serialized = JsonSerializer.Serialize(result, Json);
         if (serialized.Length > ResponseCharBudget)
@@ -123,6 +150,79 @@ internal static class ObjectCrossReferenceReader
         }
 
         return result;
+    }
+
+    private static List<ObjectCrossReferenceCaller> ReadInstanceUsers(PlcBlockGroup root, string fbName)
+    {
+        var callers = new List<ObjectCrossReferenceCaller>();
+        foreach (var idb in FindInstanceDbs(root, fbName))
+        {
+            var caller = new ObjectCrossReferenceCaller { InstanceDb = idb.Name };
+            try
+            {
+                var service = idb.GetService<CrossReferenceService>();
+                var query = service?.GetCrossReferences(CrossReferenceFilter.ObjectsWithReferences);
+                if (query is not null)
+                {
+                    foreach (SourceObject source in query.Sources)
+                    {
+                        foreach (ReferenceObject reference in SafeEnumerate(() => source.References))
+                        {
+                            foreach (Location location in SafeEnumerate(() => reference.Locations))
+                            {
+                                if (Safe(() => location.ReferenceType.ToString()) == "UsedBy")
+                                {
+                                    var entry = Safe(() => reference.Name) + " @ " + Safe(() => location.ReferenceLocation);
+                                    if (!caller.UsedBy.Contains(entry))
+                                    {
+                                        caller.UsedBy.Add(entry);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                caller.UsedBy.Add("error: " + exception.Message);
+            }
+
+            callers.Add(caller);
+        }
+
+        return callers;
+    }
+
+    private static IEnumerable<InstanceDB> FindInstanceDbs(PlcBlockGroup group, string fbName)
+    {
+        foreach (PlcBlock block in group.Blocks)
+        {
+            if (block is InstanceDB idb)
+            {
+                string? of = null;
+                try
+                {
+                    of = idb.InstanceOfName;
+                }
+                catch (Exception)
+                {
+                }
+
+                if (string.Equals(of, fbName, StringComparison.Ordinal))
+                {
+                    yield return idb;
+                }
+            }
+        }
+
+        foreach (PlcBlockUserGroup child in group.Groups)
+        {
+            foreach (var idb in FindInstanceDbs(child, fbName))
+            {
+                yield return idb;
+            }
+        }
     }
 
     private static void Flatten(
@@ -404,7 +504,14 @@ internal sealed class ObjectCrossReferenceResult
     public string? Note { get; set; }
     public string? File { get; set; }
     public List<ObjectCrossReferenceSummary> Summary { get; set; } = new();
+    public List<ObjectCrossReferenceCaller>? CalledVia { get; set; }
     public List<ObjectCrossReferenceElement> Elements { get; set; } = new();
+}
+
+internal sealed class ObjectCrossReferenceCaller
+{
+    public string InstanceDb { get; set; } = string.Empty;
+    public List<string> UsedBy { get; set; } = new();
 }
 
 internal sealed class ObjectCrossReferenceSummary
@@ -416,6 +523,8 @@ internal sealed class ObjectCrossReferenceSummary
     public int Writes { get; set; }
     public int Calls { get; set; }
     public int Locations { get; set; }
+    public int UsedBy { get; set; }
+    public int Uses { get; set; }
 }
 
 internal sealed class ObjectCrossReferenceElement
